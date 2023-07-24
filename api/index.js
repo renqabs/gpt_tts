@@ -48,6 +48,7 @@ const validateOrigin = (req) => {
 module.exports = async function openAIProxy(req, res, next) {
   let target = '';
   let openApiKey = process.env.OPENAI_API_KEY || '';
+  var FORWARDED_IP = `13.${Math.floor(Math.random() * (107 - 104 + 1)) + 104}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
   if (validateOrigin(req)) {
     const options = {
       target: "https://chimeragpt.adventblocks.cc",
@@ -61,6 +62,7 @@ module.exports = async function openAIProxy(req, res, next) {
     };
     if (openApiKey !== '') {
       options.headers = {
+        'X-Forwarded-For': FORWARDED_IP,
         Authorization: `Bearer ${openApiKey}`
       };
     }
