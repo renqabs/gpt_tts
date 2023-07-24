@@ -101,10 +101,11 @@ const validateOrigin = (req) => {
 module.exports = async function openAIProxy(req, res, next) {
   let target = '';
   let openApiKey = process.env.OPENAI_API_KEY || '';
+  let ApiUrl = process.env.API_URL || 'https://chimeragpt.adventblocks.cc';
   const randIP = getRandomIP();
   if (validateOrigin(req)) {
     const options = {
-      target: "https://chimeragpt.adventblocks.cc",
+      target: ApiUrl,
       changeOrigin: true,
       pathRewrite: {
         "^/api": "" // strip "/api" from the URL
