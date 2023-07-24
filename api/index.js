@@ -1,4 +1,57 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const IP_RANGE = [
+  ['3.2.50.0', '3.5.31.255'], //192,000
+  ['3.12.0.0', '3.23.255.255'], //786,432
+  ['3.30.0.0', '3.33.34.255'], //205,568
+  ['3.40.0.0', '3.63.255.255'], //1,572,864
+  ['3.80.0.0', '3.95.255.255'], //1,048,576
+  ['3.100.0.0', '3.103.255.255'], //262,144
+  ['3.116.0.0', '3.119.255.255'], //262,144
+  ['3.128.0.0', '3.247.255.255'], //7,864,320
+];
+
+/**
+ * 随机整数 [min,max)
+ * @param {number} min
+ * @param {number} max
+ * @returns
+ */
+const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min)) + min;
+
+/**
+ * ip 转 int
+ * @param {string} ip
+ * @returns
+ */
+const ipToInt = (ip) => {
+  const ipArr = ip.split('.');
+  let result = 0;
+  result += +ipArr[0] << 24;
+  result += +ipArr[1] << 16;
+  result += +ipArr[2] << 8;
+  result += +ipArr[3];
+  return result;
+};
+
+/**
+ * int 转 ip
+ * @param {number} intIP
+ * @returns
+ */
+const intToIp = (intIP) => {
+  return `${(intIP >> 24) & 255}.${(intIP >> 16) & 255}.${(intIP >> 8) & 255}.${intIP & 255}`;
+};
+
+const getRandomIP = () => {
+  const randIndex = getRandomInt(0, IP_RANGE.length);
+  const startIp = IP_RANGE[randIndex][0];
+  const endIp = IP_RANGE[randIndex][1];
+  const startIPInt = ipToInt(startIp);
+  const endIPInt = ipToInt(endIp);
+  const randomInt = getRandomInt(startIPInt, endIPInt);
+  const randomIP = intToIp(randomInt);
+  return randomIP;
+};
 
 /**
  * 将通配符字符串转换成正则表达式，支持 ? 和 * 通配符
@@ -48,7 +101,7 @@ const validateOrigin = (req) => {
 module.exports = async function openAIProxy(req, res, next) {
   let target = '';
   let openApiKey = process.env.OPENAI_API_KEY || '';
-  let FORWARDED_IP = `13.${Math.floor(Math.random() * (107 - 104 + 1)) + 104}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 254) + 1}`;
+  const randIP = getRandomIP();
   if (validateOrigin(req)) {
     const options = {
       target: "https://chimeragpt.adventblocks.cc",
@@ -62,7 +115,7 @@ module.exports = async function openAIProxy(req, res, next) {
     };
     if (openApiKey !== '') {
       options.headers = {
-        'X-Forwarded-For': FORWARDED_IP,
+        'X-Forwarded-For': randIP,
         Authorization: `Bearer ${openApiKey}`
       };
     }
