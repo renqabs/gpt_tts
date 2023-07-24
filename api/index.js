@@ -50,7 +50,7 @@ module.exports = async function openAIProxy(req, res, next) {
   let openApiKey = process.env.OPENAI_API_KEY || '';
   if (validateOrigin(req)) {
     const options = {
-      target: "https://api.openai.com",
+      target: "https://chimeragpt.adventblocks.cc",
       changeOrigin: true,
       pathRewrite: {
         "^/api": "" // strip "/api" from the URL
